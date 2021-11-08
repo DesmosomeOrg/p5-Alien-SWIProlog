@@ -10,25 +10,17 @@ Alien::SWIProlog - Alien package for the SWI-Prolog Prolog interpreter
 
 version 0.001
 
-=head1 EXTENDS
-
-=over 4
-
-=item * L<Alien::Base>
-
-=back
-
 =head1 SEE ALSO
 
 L<Repository information|http://project-renard.github.io/doc/development/repo/p5-Alien-SWIProlog/>
 
 =head1 AUTHOR
 
-Project Renard
+Zakariyya Mughal <zmughal@cpan.org>
 
 =head1 COPYRIGHT AND LICENSE
 
-This software is copyright (c) 2018 by Project Renard.
+This software is copyright (c) 2021 by Zakariyya Mughal.
 
 This is free software; you can redistribute it and/or modify it under
 the same terms as the Perl 5 programming language system itself.
