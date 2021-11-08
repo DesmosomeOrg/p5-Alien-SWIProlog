@@ -9,6 +9,6 @@ use parent qw(Alien::Base);
 1;
 =head1 SEE ALSO
 
-L<Repository information|http://project-renard.github.io/doc/development/repo/p5-Alien-SWIProlog/>
+L<SWI-Prolog|https://www.swi-prolog.org/>
 
 =cut
