@@ -1,0 +1,25 @@
+use alienfile;
+
+#plugin 'PkgConfig' => 'swipl';
+
+use Config;
+
+share {
+	requires 'Path::Tiny';
+
+	plugin Download => (
+		url => 'http://www.swi-prolog.org/download/stable',
+		version => qr/swipl-([\d\.]+)\.tar\.gz/,
+	);
+
+	plugin Extract => 'tar.gz';
+
+	plugin 'Build::Autoconf';
+
+	my $threads = $Config{useithreads} ? '--enable-mt' : '--disable-mt';
+	build [
+		"%{configure} --with-world '--with-pic $threads'",
+		'%{make}',
+		'%{make} install',
+	];
+};
