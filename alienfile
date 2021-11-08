@@ -8,7 +8,7 @@ share {
 	requires 'Path::Tiny';
 
 	plugin Download => (
-		url => 'http://www.swi-prolog.org/download/stable',
+		url => 'https://www.swi-prolog.org/download/stable',
 		version => qr/swipl-([\d\.]+)\.tar\.gz/,
 	);
 
