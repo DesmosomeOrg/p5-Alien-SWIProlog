@@ -14,11 +14,19 @@ share {
 
 	plugin Extract => 'tar.gz';
 
-	plugin 'Build::Autoconf';
+	plugin 'Build::CMake';
 
-	my $threads = $Config{useithreads} ? '--enable-mt' : '--disable-mt';
+	my $threads = $Config{useithreads} ? '-DMULTI_THREADED=ON' : '-DMULTI_THREADED=OFF';
 	build [
-		"%{configure} --with-world '--with-pic $threads'",
+		[ '%{cmake}',
+			@{ meta->prop->{plugin_build_cmake}->{args} },
+			$threads,
+			qw(
+				-DSWIPL_PACKAGES_X=OFF
+				-DINSTALL_DOCUMENTATION=OFF
+			),
+			'%{.install.extract}'
+		],
 		'%{make}',
 		'%{make} install',
 	];
