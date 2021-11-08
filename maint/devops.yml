@@ -1,7 +1,10 @@
 native:
   debian:
-    packages: ~
+    packages:
+      - cmake
   macos-homebrew:
-    packages: ~
+    packages:
+      - cmake
   msys2-mingw64:
-    packages: ~
+    packages:
+      - mingw-w64-x86_64-cmake
