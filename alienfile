@@ -3,7 +3,6 @@ use alienfile;
 use Config;
 requires 'ExtUtils::CBuilder';
 requires 'Path::Tiny';
-requires 'File::chdir';
 
 my $test_program = <<EOF;
 /* checking for conflicting symbol */
@@ -45,6 +44,8 @@ meta->around_hook( probe => sub {
 });
 
 share {
+	requires 'File::Which';
+
 	my $release_type = 'stable';
 	die "Release type must be either 'stable' or 'devel'"
 		unless $release_type =~ /^(stable|devel)$/;
@@ -65,9 +66,19 @@ share {
 	};
 
 	my $threads = $Config{useithreads} ? '-DMULTI_THREADED=ON' : '-DMULTI_THREADED=OFF';
+
+	my @other_cmake_args = ();
+	if( exists $ENV{MSYSTEM} && $ENV{MSYSTEM} =~ /^mingw(32|64)$/i
+		&& File::Which::which('cygpath') ) {
+		# Running under MSYS2
+		chomp( my $MINGW_ROOT = `cygpath -m /$ENV{MSYSTEM}` );
+		push @other_cmake_args, "-DMINGW_ROOT=$MINGW_ROOT";
+	}
+
 	build [
 		[ '%{cmake}',
 			@{ meta->prop->{plugin_build_cmake}->{args} },
+			@other_cmake_args,
 			$threads,
 			qw(
 				-DSWIPL_PACKAGES_X=OFF
