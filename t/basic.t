@@ -4,17 +4,12 @@ use Test::Alien::Diag;
 use Alien::SWIProlog;
 
 use DynaLoader;
-use File::Spec;
-use Config;
+use Path::Tiny;
 
-my $swi_home_dir = File::Spec->catfile(
-	Alien::SWIProlog->runtime_prop->{distdir},
-	qw(lib swipl)
-);
-my $swi_lib_dir = File::Spec->catfile(
-	$swi_home_dir,
-	qw(lib), $Config{archname}
-);
+my $distdir = path(Alien::SWIProlog->runtime_prop->{distdir});
+my $swi_home_dir = $distdir->child( qw(lib swipl) );
+my ($swi_lib_dir) = grep { $_->is_dir && $_ !~ /swiplserver/ }
+	$swi_home_dir->child('lib')->children();
 
 $ENV{SWI_HOME_DIR} = $swi_home_dir;
 unshift @DynaLoader::dl_library_path, $swi_lib_dir;
