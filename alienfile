@@ -45,8 +45,13 @@ meta->around_hook( probe => sub {
 });
 
 share {
+	my $release_type = 'stable';
+	die "Release type must be either 'stable' or 'devel'"
+		unless $release_type =~ /^(stable|devel)$/;
 	plugin Download => (
-		url => 'https://www.swi-prolog.org/download/stable',
+		# https://www.swi-prolog.org/download/stable/src/
+		# https://www.swi-prolog.org/download/devel/src/
+		url => "https://www.swi-prolog.org/download/$release_type/src/",
 		version => qr/swipl-([\d\.]+)\.tar\.gz/,
 	);
 
