@@ -1,12 +1,50 @@
 use alienfile;
 
-#plugin 'PkgConfig' => 'swipl';
-
 use Config;
+requires 'ExtUtils::CBuilder';
+requires 'Path::Tiny';
+requires 'File::chdir';
+
+my $test_program = <<EOF;
+/* checking for conflicting symbol */
+extern int PL_version;
+
+#include <SWI-Prolog.h>
+
+int main(int argc, char *argv[]) {
+	return 0;
+}
+EOF
+
+plugin 'PkgConfig' => 'swipl';
+
+meta->around_hook( probe => sub {
+	my $orig = shift;
+	my $build = shift;
+	my $return = $orig->($build, @_);
+
+	if( $return eq 'system' ) {
+		# run gather_system now
+		#$build->_call_hook( 'gather_system', $build );
+		$build->meta->{hook}{gather_system}[0]->execute( $build );
+		require ExtUtils::CBuilder;
+		my $b = ExtUtils::CBuilder->new();
+		my $src = Path::Tiny->tempfile( SUFFIX => '.c' );
+		$src->spew_utf8($test_program);
+		my $obj = $b->compile(
+			source => "$src",
+			extra_compiler_flags => $build->runtime_prop->{cflags},
+		);
+		my $exe = $b->link_executable(
+			objects => $obj,
+			extra_linker_flags   => $build->runtime_prop->{libs},
+		);
+	}
+
+	return $return;
+});
 
 share {
-	requires 'Path::Tiny';
-
 	plugin Download => (
 		url => 'https://www.swi-prolog.org/download/stable',
 		version => qr/swipl-([\d\.]+)\.tar\.gz/,
@@ -15,6 +53,11 @@ share {
 	plugin Extract => 'tar.gz';
 
 	plugin 'Build::CMake';
+
+	patch sub {
+		my @files = qw( src/SWI-Prolog.h src/os/pl-prologflag.c src/pl-fli.c );
+		system( $^X, qw(-pi -e), q{ s/\bPL_version\b/Swi$&/ }, @files );
+	};
 
 	my $threads = $Config{useithreads} ? '-DMULTI_THREADED=ON' : '-DMULTI_THREADED=OFF';
 	build [
