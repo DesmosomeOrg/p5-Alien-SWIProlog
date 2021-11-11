@@ -68,11 +68,14 @@ share {
 	my $threads = $Config{useithreads} ? '-DMULTI_THREADED=ON' : '-DMULTI_THREADED=OFF';
 
 	my @other_cmake_args = ();
-	if( exists $ENV{MSYSTEM} && $ENV{MSYSTEM} =~ /^mingw(32|64)$/i
-		&& File::Which::which('cygpath') ) {
+	my $is_msys2_mingw = exists $ENV{MSYSTEM} && $ENV{MSYSTEM} =~ /^mingw(32|64)$/i;
+	if( $is_msys2_mingw && File::Which::which('cygpath') ) {
 		# Running under MSYS2
 		chomp( my $MINGW_ROOT = `cygpath -m /$ENV{MSYSTEM}` );
 		push @other_cmake_args, "-DMINGW_ROOT=$MINGW_ROOT";
+
+		# current build not set up to link with libarchive correctly
+		push @other_cmake_args, '-DSWIPL_PACKAGES_ARCHIVE=OFF';
 	}
 
 	build [
@@ -86,6 +89,13 @@ share {
 			),
 			'%{.install.extract}'
 		],
+		sub {
+			if( $is_msys2_mingw ) {
+				# because src/mkversion.sh does not run
+				# properly
+				Path::Tiny::path('src', 'version.h')->touch;
+			}
+		},
 		'%{make}',
 		'%{make} install',
 	];
