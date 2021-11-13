@@ -180,7 +180,11 @@ share {
 			( map  "-L$_", @lib_paths  ) ,
 			@ldlibs;
 
+		my @rpaths = map { "" . $_->relative($prefix) }
+			@lib_paths;
+
 		$build->runtime_prop->{cflags}  = $cflags;
 		$build->runtime_prop->{libs}    = $libs;
+		$build->runtime_prop->{rpath}   = \@rpaths;
 	};
 };
