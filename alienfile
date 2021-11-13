@@ -44,12 +44,12 @@ probe sub {
 	for $PL (@SWIPL_BIN_NAMES) {
 		my $PL_path = File::Which::which($PL) or next;
 		$build->log("Trying SWI-Prolog binary $PL ($PL_path)");
-		$PLVARS = Alien::SWIProlog::Util::get_plvars($PL)
-			and last;
+		$PLVARS = Alien::SWIProlog::Util::get_plvars($PL);
+		keys %$PLVARS and last;
 	};
 
 	# when not found
-	return 'share' unless $PLVARS;
+	return 'share' unless keys %$PLVARS;
 
 	$build->log( Dumper($PLVARS) );
 
