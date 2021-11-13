@@ -17,7 +17,8 @@ requires 'ExtUtils::CBuilder';
 my @SWIPL_BIN_NAMES = (
 	( exists $ENV{PL} ? $ENV{PL} : () ),
 	( $^O =~ /Win32/ ? 'plcon' : () ),
-	qw(swipl swi-prolog pl),
+	qw(swipl swi-prolog),
+	( $^O !~ /darwin/ ? 'pl' : () ),
 );
 
 my $test_program = <<EOF;
