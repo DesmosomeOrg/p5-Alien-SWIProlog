@@ -5,6 +5,7 @@ use strict;
 use warnings;
 
 use parent qw(Alien::Base);
+use Alien::SWIProlog::Util;
 
 1;
 =head1 SEE ALSO
