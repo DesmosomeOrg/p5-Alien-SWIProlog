@@ -17,8 +17,10 @@ push @swi_lib_dirs, grep { $_->is_dir && $_ !~ /swiplserver/ }
         $swi_home_dir->child('lib')->children();
 
 $ENV{SWI_HOME_DIR} = $swi_home_dir;
-use Env qw(@LD_LIBRARY_PATH);
+use Env qw(@LD_LIBRARY_PATH @DYLD_FALLBACK_LIBRARY_PATH @PATH);
 unshift @LD_LIBRARY_PATH, @swi_lib_dirs;
+unshift @DYLD_FALLBACK_LIBRARY_PATH, @swi_lib_dirs;
+unshift @PATH, @swi_lib_dirs;
 unshift @DynaLoader::dl_library_path, @swi_lib_dirs;
 my ($dlfile) = DynaLoader::dl_findfile('-lswipl');
 DynaLoader::dl_load_file($dlfile);
