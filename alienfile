@@ -1,6 +1,8 @@
 use alienfile;
 
+use Env qw(@CMAKE_INCLUDE_PATH @CMAKE_LIBRARY_PATH);
 use Config;
+use DynaLoader ();
 use Data::Dumper;
 use File::Basename qw(dirname);
 
@@ -130,7 +132,7 @@ share {
 	my $threads = $Config{useithreads} ? '-DMULTI_THREADED=ON' : '-DMULTI_THREADED=OFF';
 
 	my @other_cmake_args = ();
-	my $is_msys2_mingw = exists $ENV{MSYSTEM} && $ENV{MSYSTEM} =~ /^mingw(32|64)$/i;
+	my $is_msys2_mingw = $^O eq 'MSWin32' && exists $ENV{MSYSTEM} && $ENV{MSYSTEM} =~ /^mingw(32|64)$/i;
 	if( $is_msys2_mingw && File::Which::which('cygpath') ) {
 		# Running under MSYS2
 		chomp( my $MINGW_ROOT = `cygpath -m /$ENV{MSYSTEM}` );
@@ -138,6 +140,34 @@ share {
 
 		# current build not set up to link with libarchive correctly
 		push @other_cmake_args, '-DSWIPL_PACKAGES_ARCHIVE=OFF';
+	}
+	my $is_strawberry = $^O eq 'MSWin32' && $Config{myuname} =~ /^Win32 strawberry-perl/;
+	if( $is_strawberry ) {
+		# This helps to find the paths under Strawberry Perl.
+		my ($zlib_found) = DynaLoader::dl_findfile('-lzlib');
+		if( $zlib_found ) {
+			my $zlib_file = Path::Tiny::path($zlib_found);
+
+			my $c_lib_dir = $zlib_file->parent;
+			my $c_dir = $c_lib_dir->parent;
+			my $c_inc_dir = $c_dir->child('include');
+
+			my $arch = 'x86_64-w64-mingw32';
+			my $arch_lib_dir = $c_dir->child($arch, 'lib' );
+			my $arch_inc_dir = $c_dir->child($arch, 'include' );
+
+			push @CMAKE_LIBRARY_PATH, "$c_lib_dir", "$arch_lib_dir";
+			push @CMAKE_INCLUDE_PATH, "$c_inc_dir", "$arch_inc_dir";
+
+			push @other_cmake_args, "-DMINGW_ROOT=$c_dir";
+
+			# no libgmp in Strawberry Perl
+			push @other_cmake_args, '-DUSE_GMP=OFF';
+
+			# not able to generate certs for tests due to missing
+			# openssl.cnf
+			push @other_cmake_args, '-DSKIP_SSL_TESTS=ON';
+		}
 	}
 
 	build [
@@ -167,16 +197,25 @@ share {
 		my ($build) = @_;
 		my $prefix = Path::Tiny::path($build->runtime_prop->{prefix});
 
+		my $is_windows = $^O eq 'MSWin32';
+
 		my @home_parts = qw(lib swipl);
-		my $home_path = $prefix->child(@home_parts);
+		my $home_path =
+			$is_windows
+			? $prefix
+			: $prefix->child(@home_parts);
+
 		my $inc_path = $home_path->child(qw(include));
+
 		my @lib_paths = $prefix->child(qw(lib));
+		push @lib_paths, $prefix->child(qw(bin)) if $is_windows;
 		my $lib_home_path = Path::Tiny::path(@home_parts, 'lib');
 		if( -d $lib_home_path ) {
 			push @lib_paths, map { $prefix->child($_) }
 				grep { $_->is_dir && $_ !~ /swiplserver/ }
 				$lib_home_path->children;
 		}
+
 		my @ldlibs = "-lswipl";
 
 		my $cflags = "-I$inc_path";
@@ -187,6 +226,7 @@ share {
 		my @rpaths = map { "" . $_->relative($prefix) }
 			@lib_paths;
 
+		$build->runtime_prop->{home}    = "$home_path";
 		$build->runtime_prop->{cflags}  = $cflags;
 		$build->runtime_prop->{libs}    = $libs;
 		$build->runtime_prop->{rpath}   = \@rpaths;
