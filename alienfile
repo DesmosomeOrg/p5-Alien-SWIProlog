@@ -181,6 +181,7 @@ share {
 			qw(-DINSTALL_DOCUMENTATION=OFF),
 			# install shared library under lib, not lib/$arch
 			qw(-DSWIPL_INSTALL_IN_LIB=ON),
+			'.',
 		],
 		sub {
 			if( $is_msys2_mingw ) {
