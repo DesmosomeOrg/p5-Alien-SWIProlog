@@ -54,10 +54,10 @@ __DATA__
 int
 init(const char *class)
 {
-	int PL_argc;
+	int PL_argc = 0;
 	char empty_arg[] = "";
 
-	char* PL_argv[1];
+	char** PL_argv[1];
 	PL_argv[PL_argc++] = empty_arg;
 
 	return PL_initialise(PL_argc, PL_argv);
