@@ -5,19 +5,58 @@ use Alien::SWIProlog;
 
 use DynaLoader;
 use Path::Tiny;
-
-my $distdir = path(Alien::SWIProlog->runtime_prop->{distdir});
-my $swi_home_dir = $distdir->child( qw(lib swipl) );
-my ($swi_lib_dir) = grep { $_->is_dir && $_ !~ /swiplserver/ }
-	$swi_home_dir->child('lib')->children();
-
-$ENV{SWI_HOME_DIR} = $swi_home_dir;
-unshift @DynaLoader::dl_library_path, $swi_lib_dir;
-
-DynaLoader::dl_load_file((DynaLoader::dl_findfile('-lswipl'))[0]);
+use Data::Dumper;
 
 alien_diag 'Alien::SWIProlog';
 alien_ok 'Alien::SWIProlog';
+
+my $prop = Alien::SWIProlog->runtime_prop;
+my $prefix = path( $prop->{prefix} );
+my $distdir = path( $prop->{distdir} );
+sub _convert {
+	my $p = path($_[0]);
+	my $rel = $p->is_relative
+		? $p
+		: $p->relative($prefix);
+	"" . $distdir->child( $rel );
+}
+for my $k ( qw( swipl-bin home rpath ) ) {
+	if( ref $prop->{$k} eq 'ARRAY' ) {
+		$prop->{$k} = [ map _convert($_), @{ $prop->{$k} } ];
+	} else {
+		$prop->{$k} = _convert( $prop->{$k} );
+	}
+}
+
+my @swi_lib_dirs = @{ $prop->{rpath} };
+
+use Env qw(
+	$SWI_HOME_DIR
+	@LD_LIBRARY_PATH @DYLD_FALLBACK_LIBRARY_PATH @PATH
+);
+
+$SWI_HOME_DIR = $prop->{home};
+
+unshift @LD_LIBRARY_PATH, @swi_lib_dirs;
+unshift @DYLD_FALLBACK_LIBRARY_PATH, @swi_lib_dirs;
+unshift @PATH, @swi_lib_dirs;
+unshift @DynaLoader::dl_library_path, @swi_lib_dirs;
+
+my ($dlfile) = DynaLoader::dl_findfile('-lswipl');
+if( $dlfile ) {
+	note "dlfile: $dlfile";
+	DynaLoader::dl_load_file($dlfile);
+} else {
+	note "dlfile: not found";
+}
+
+require Alien::SWIProlog::Util;
+my $PLVARS = Alien::SWIProlog::Util::get_plvars($prop->{'swipl-bin'});
+{
+local $Data::Dumper::Terse = 1;
+local $Data::Dumper::Sortkeys = 1;
+note Dumper( $PLVARS );
+}
 
 my $xs = do { local $/; <DATA> };
 xs_ok { xs => $xs,  verbose => 1 }, with_subtest {
@@ -37,10 +76,10 @@ __DATA__
 int
 init(const char *class)
 {
-	int PL_argc;
+	int PL_argc = 0;
 	char empty_arg[] = "";
 
-	char* PL_argv[1];
+	char** PL_argv[1];
 	PL_argv[PL_argc++] = empty_arg;
 
 	return PL_initialise(PL_argc, PL_argv);

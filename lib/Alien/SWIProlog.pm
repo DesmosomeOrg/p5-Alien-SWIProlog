@@ -4,7 +4,11 @@ package Alien::SWIProlog;
 use strict;
 use warnings;
 
-use parent qw(Alien::Base);
+use base qw(Alien::Base);
+use Role::Tiny::With qw( with );
+use Alien::SWIProlog::Util;
+
+with 'Alien::Role::Dino';
 
 1;
 =head1 SEE ALSO
