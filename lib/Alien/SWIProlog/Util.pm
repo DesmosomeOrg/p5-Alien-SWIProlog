@@ -22,11 +22,11 @@ sub get_plvars {
 sub plvars_to_props {
 	my ($pl, $plvars) = @_;
 	return +{
+		'swipl-bin' => $pl,
+		home => $plvars->{PLBASE},
 		cflags => "-I$plvars->{PLBASE}/include",
 		libs => "-L$plvars->{PLLIBDIR} $plvars->{PLLIB}",
-		exe => $pl,
-		rpath => $plvars->{PLLIBDIR},
-		_PL => $pl,
+		rpath => [ $plvars->{PLLIBDIR} ],
 		_PLVARS => $plvars,
 	}
 }

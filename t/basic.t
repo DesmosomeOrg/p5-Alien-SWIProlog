@@ -5,26 +5,43 @@ use Alien::SWIProlog;
 
 use DynaLoader;
 use Path::Tiny;
+use Data::Dumper;
 
 alien_diag 'Alien::SWIProlog';
 alien_ok 'Alien::SWIProlog';
 
-my $distdir = path( Alien::SWIProlog->runtime_prop->{distdir} );
-my $PL = $distdir->child(qw(bin swipl));
-my $swi_home_dir = $distdir->child( qw(lib swipl) );
-my @swi_lib_dirs = $distdir->child(qw(lib));
-my $swi_lib_home = $swi_home_dir->child('lib');
-if( -d $swi_lib_home ) {
-	push @swi_lib_dirs, grep { $_->is_dir && $_ !~ /swiplserver/ }
-		$swi_home_dir->child('lib')->children();
+my $prop = Alien::SWIProlog->runtime_prop;
+my $prefix = path( $prop->{prefix} );
+my $distdir = path( $prop->{distdir} );
+sub _convert {
+	my $p = path($_[0]);
+	my $rel = $p->is_relative
+		? $p
+		: $p->relative($prefix);
+	"" . $distdir->child( $rel );
+}
+for my $k ( qw( swipl-bin home rpath ) ) {
+	if( ref $prop->{$k} eq 'ARRAY' ) {
+		$prop->{$k} = [ map _convert($_), @{ $prop->{$k} } ];
+	} else {
+		$prop->{$k} = _convert( $prop->{$k} );
+	}
 }
 
-$ENV{SWI_HOME_DIR} = $swi_home_dir;
-use Env qw(@LD_LIBRARY_PATH @DYLD_FALLBACK_LIBRARY_PATH @PATH);
+my @swi_lib_dirs = @{ $prop->{rpath} };
+
+use Env qw(
+	$SWI_HOME_DIR
+	@LD_LIBRARY_PATH @DYLD_FALLBACK_LIBRARY_PATH @PATH
+);
+
+$SWI_HOME_DIR = $prop->{home};
+
 unshift @LD_LIBRARY_PATH, @swi_lib_dirs;
 unshift @DYLD_FALLBACK_LIBRARY_PATH, @swi_lib_dirs;
 unshift @PATH, @swi_lib_dirs;
 unshift @DynaLoader::dl_library_path, @swi_lib_dirs;
+
 my ($dlfile) = DynaLoader::dl_findfile('-lswipl');
 if( $dlfile ) {
 	note "dlfile: $dlfile";
@@ -34,7 +51,12 @@ if( $dlfile ) {
 }
 
 require Alien::SWIProlog::Util;
-my $PLVARS = Alien::SWIProlog::Util::get_plvars($PL);
+my $PLVARS = Alien::SWIProlog::Util::get_plvars($prop->{'swipl-bin'});
+{
+local $Data::Dumper::Terse = 1;
+local $Data::Dumper::Sortkeys = 1;
+note Dumper( $PLVARS );
+}
 
 my $xs = do { local $/; <DATA> };
 xs_ok { xs => $xs,  verbose => 1 }, with_subtest {
