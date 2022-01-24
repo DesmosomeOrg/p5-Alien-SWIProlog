@@ -1,0 +1,70 @@
+name: Run Tests in swipl containers
+
+on:
+  push:
+    branches:
+      - '*'
+  pull_request:
+
+jobs:
+  dist:
+    name: Make distribution using Dist::Zilla
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      - name: 'build-dzil-dist'
+        uses: PDLPorters/devops/github-actions/build-dzil-dist@master
+  ci-container:
+    runs-on: ubuntu-latest
+    needs: [ dist ]
+    container: ${{ matrix.container }}
+    env:
+      AUTHOR_TESTING: 1
+    strategy:
+      fail-fast: false
+      matrix:
+        perl: [ '5' ]
+        thread: [ 'true' ]
+        container:
+          - swipl:7.5.15
+          - swipl:7.6.4
+          - swipl:7.7.25
+          - swipl:8.0.3
+          - swipl:8.1.0
+          - swipl:8.1.15
+          #- swipl:8.1.30
+          #- swipl:8.2.4
+          #- swipl:8.3.29
+          #- swipl:8.4.0
+          #- swipl:stable
+    name: Perl ${{ matrix.perl }} with swipl container ${{ matrix.container }}
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Get dist artifact
+        uses: actions/download-artifact@v2
+        with:
+          name: dist
+          path: build-dir
+      - name: Get pre-reqs for steps
+        run: |
+          apt-get update && apt-get install -y build-essential xz-utils curl cmake
+          # from <https://github.com/horta/zstd.install>
+          bash -c "$(curl -fsSL https://raw.githubusercontent.com/horta/zstd.install/main/install)"
+      - name: Set up perl
+        uses: shogo82148/actions-setup-perl@v1
+        with:
+          perl-version: ${{ matrix.perl }}
+          multi-thread: ${{ matrix.thread }}
+      - run: perl -V
+      - name: Install Perl deps
+        run: |
+          cpanm --verbose --notest --installdeps ./build-dir
+      - name: Install Perl author deps
+        run: |
+          cpanm --notest --installdeps --with-develop ./build-dir
+      - name: Run tests
+        run: |
+          cpanm --verbose --test-only ./build-dir
