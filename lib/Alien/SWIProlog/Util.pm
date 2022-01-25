@@ -2,6 +2,7 @@ package Alien::SWIProlog::Util;
 # ABSTRACT: Utilities for SWI-Prolog configuration
 
 use Capture::Tiny qw(capture_stdout);
+use File::Spec;
 
 use constant SWIPL_ARGS => qw(
 	--dump-runtime-variables
@@ -21,12 +22,30 @@ sub get_plvars {
 
 sub plvars_to_props {
 	my ($pl, $plvars) = @_;
+
+	# older swipl have PLLDFLAGS but no PLLIBDIR
+	my $gen_PLLIBDIR;
+	if( ! exists $plvars->{PLLIBDIR} ) {
+		$gen_PLLIBDIR = File::Spec->catfile(
+			$plvars->{PLBASE},
+			'lib',
+			$plvars->{PLARCH}, )
+	}
+
 	return +{
 		'swipl-bin' => $pl,
 		home => $plvars->{PLBASE},
 		cflags => "-I$plvars->{PLBASE}/include",
-		libs => "-L$plvars->{PLLIBDIR} $plvars->{PLLIB}",
-		rpath => [ $plvars->{PLLIBDIR} ],
+		libs => ( exists $plvars->{PLLIBDIR}
+			? join(' ', "-L$plvars->{PLLIBDIR}", $plvars->{PLLIB})
+			: join(' ', "-L$gen_PLLIBDIR", $plvars->{PLLDFLAGS}, $plvars->{PLLIB}),
+			),
+		rpath => [
+			( exists $plvars->{PLLIBDIR}
+			?  $plvars->{PLLIBDIR}
+			:  $gen_PLLIBDIR
+			)
+		],
 		_PLVARS => $plvars,
 	}
 }

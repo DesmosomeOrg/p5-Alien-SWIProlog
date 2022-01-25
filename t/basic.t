@@ -15,10 +15,13 @@ my $prefix = path( $prop->{prefix} );
 my $distdir = path( $prop->{distdir} );
 sub _convert {
 	my $p = path($_[0]);
-	my $rel = $p->is_relative
-		? $p
-		: $p->relative($prefix);
-	"" . $distdir->child( $rel );
+	if( Alien::SWIProlog->install_type('share') ) {
+		my $rel = $p->is_relative
+			? $p
+			: $p->relative($prefix);
+		return "" . $distdir->child( $rel );
+	}
+	return $p;
 }
 for my $k ( qw( swipl-bin home rpath ) ) {
 	if( ref $prop->{$k} eq 'ARRAY' ) {
