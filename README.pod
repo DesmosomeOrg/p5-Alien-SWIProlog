@@ -8,7 +8,7 @@ Alien::SWIProlog - Alien package for the SWI-Prolog Prolog interpreter
 
 =head1 VERSION
 
-version 0.001
+version 0.001_01
 
 =head1 SEE ALSO
 
