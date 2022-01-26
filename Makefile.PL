@@ -33,6 +33,7 @@ my %WriteMakefileArgs = (
     "Alien::Base" => "0.038",
     "Alien::Role::Dino" => 0,
     "Capture::Tiny" => 0,
+    "File::Spec" => 0,
     "Role::Tiny::With" => 0,
     "base" => 0,
     "constant" => 0,
@@ -48,7 +49,7 @@ my %WriteMakefileArgs = (
     "Test::Alien" => 0,
     "Test::Alien::Diag" => 0
   },
-  "VERSION" => "0.001",
+  "VERSION" => "0.001_01",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -66,6 +67,7 @@ my %FallbackPrereqs = (
   "Env" => 0,
   "ExtUtils::CBuilder" => 0,
   "ExtUtils::MakeMaker" => "6.52",
+  "File::Spec" => 0,
   "File::Which" => 0,
   "List::Util" => "1.33",
   "Path::Tiny" => 0,

@@ -1,6 +1,7 @@
 package Alien::SWIProlog;
 # ABSTRACT: Alien package for the SWI-Prolog Prolog interpreter
-$Alien::SWIProlog::VERSION = '0.001';
+$Alien::SWIProlog::VERSION = '0.001_01'; # TRIAL
+$Alien::SWIProlog::VERSION = '0.00101';
 use strict;
 use warnings;
 
@@ -24,7 +25,7 @@ Alien::SWIProlog - Alien package for the SWI-Prolog Prolog interpreter
 
 =head1 VERSION
 
-version 0.001
+version 0.001_01
 
 =head1 SEE ALSO
 

@@ -31,10 +31,19 @@ meta-spec:
   url: http://module-build.sourceforge.net/META-spec-v1.4.html
   version: '1.4'
 name: Alien-SWIProlog
+no_index:
+  directory:
+    - eg
+    - examples
+    - inc
+    - share
+    - t
+    - xt
 requires:
   Alien::Base: '0.038'
   Alien::Role::Dino: '0'
   Capture::Tiny: '0'
+  File::Spec: '0'
   Role::Tiny::With: '0'
   base: '0'
   constant: '0'
@@ -44,7 +53,7 @@ requires:
 resources:
   homepage: https://github.com/DesmosomeOrg/p5-Alien-SWIProlog
   repository: https://github.com/DesmosomeOrg/p5-Alien-SWIProlog.git
-version: '0.001'
+version: 0.001_01
 x_alienfile:
   generated_by: 'Dist::Zilla::Plugin::AlienBuild version 0.32'
   requires:
