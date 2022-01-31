@@ -23,6 +23,9 @@ my @SWIPL_BIN_NAMES = (
 	( $^O !~ /darwin/ ? 'pl' : () ),
 );
 
+# Check for conflicting symbol PL_version.
+# See <https://github.com/salva/p5-Language-Prolog-Yaswi/issues/3>,
+# <https://github.com/SWI-Prolog/swipl-devel/issues/900>.
 my $test_program = <<EOF;
 /* checking for conflicting symbol */
 extern int PL_version;
