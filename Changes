@@ -1,3 +1,7 @@
+0.001_02 2022-01-31 02:40:42-0500
+
+  Features
+
    - Dynamically load library and set SWI_HOME_DIR on import.
      See PR <https://github.com/DesmosomeOrg/p5-Alien-SWIProlog/pull/4>.
 
