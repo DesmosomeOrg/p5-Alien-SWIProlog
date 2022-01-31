@@ -41,7 +41,12 @@ jobs:
           - swipl:8.3.29
           - swipl:8.4.0
           - swipl:stable
-    name: Perl ${{ matrix.perl }} with swipl container ${{ matrix.container }}
+        include:
+          # Include a version that would usually be a system install, but the
+          # threading of SWI-Prolog and Perl does not match so must build a share
+          # install.
+          - { perl: '5', thread: false, container: 'swipl:7.5.15' }
+    name: Perl ${{ matrix.perl }},thr-${{ matrix.thread }} with swipl container ${{ matrix.container }}
 
     steps:
       - uses: actions/checkout@v2
