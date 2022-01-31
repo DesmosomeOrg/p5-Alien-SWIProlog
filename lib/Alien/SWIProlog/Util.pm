@@ -1,7 +1,7 @@
 package Alien::SWIProlog::Util;
 # ABSTRACT: Utilities for SWI-Prolog configuration
-$Alien::SWIProlog::Util::VERSION = '0.001_01'; # TRIAL
-$Alien::SWIProlog::Util::VERSION = '0.00101';
+$Alien::SWIProlog::Util::VERSION = '0.001_02'; # TRIAL
+$Alien::SWIProlog::Util::VERSION = '0.00102';
 use Capture::Tiny qw(capture_stdout);
 use File::Spec;
 
@@ -70,7 +70,7 @@ Alien::SWIProlog::Util - Utilities for SWI-Prolog configuration
 
 =head1 VERSION
 
-version 0.001_01
+version 0.001_02
 
 =head1 AUTHOR
 

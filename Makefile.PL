@@ -33,6 +33,9 @@ my %WriteMakefileArgs = (
     "Alien::Base" => "0.038",
     "Alien::Role::Dino" => 0,
     "Capture::Tiny" => 0,
+    "Class::Method::Modifiers" => 0,
+    "DynaLoader" => 0,
+    "Env" => 0,
     "File::Spec" => 0,
     "Role::Tiny::With" => 0,
     "base" => 0,
@@ -42,14 +45,12 @@ my %WriteMakefileArgs = (
   },
   "TEST_REQUIRES" => {
     "Data::Dumper" => 0,
-    "DynaLoader" => 0,
-    "Env" => 0,
     "Path::Tiny" => 0,
     "Test2::V0" => 0,
     "Test::Alien" => 0,
     "Test::Alien::Diag" => 0
   },
-  "VERSION" => "0.001_01",
+  "VERSION" => "0.001_02",
   "test" => {
     "TESTS" => "t/*.t"
   }
@@ -62,6 +63,7 @@ my %FallbackPrereqs = (
   "Alien::Build::MM" => "0.32",
   "Alien::Role::Dino" => 0,
   "Capture::Tiny" => 0,
+  "Class::Method::Modifiers" => 0,
   "Data::Dumper" => 0,
   "DynaLoader" => 0,
   "Env" => 0,
