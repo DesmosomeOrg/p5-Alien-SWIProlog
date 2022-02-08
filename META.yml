@@ -54,7 +54,7 @@ requires:
 resources:
   homepage: https://github.com/DesmosomeOrg/p5-Alien-SWIProlog
   repository: https://github.com/DesmosomeOrg/p5-Alien-SWIProlog.git
-version: 0.001_02
+version: '0.002'
 x_alienfile:
   generated_by: 'Dist::Zilla::Plugin::AlienBuild version 0.32'
   requires:
