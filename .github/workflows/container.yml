@@ -57,6 +57,9 @@ jobs:
           path: build-dir
       - name: Get pre-reqs for steps
         run: |
+          grep -q stretch /etc/apt/sources.list \
+            && echo "deb http://archive.debian.org/debian stretch main contrib non-free" > /etc/apt/sources.list
+
           apt-get update && apt-get install -y build-essential xz-utils curl \
             zlib1g-dev libarchive-dev libssl-dev openssl
 
