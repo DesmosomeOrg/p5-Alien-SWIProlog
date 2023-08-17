@@ -45,7 +45,7 @@ jobs:
           # Include a version that would usually be a system install, but the
           # threading of SWI-Prolog and Perl does not match so must build a share
           # install.
-          - { perl: '5', thread: false, container: 'swipl:7.5.15' }
+          - { perl: '5', thread: false, container: 'swipl:stable' }
     name: Perl ${{ matrix.perl }},thr-${{ matrix.thread }} with swipl container ${{ matrix.container }}
 
     steps:
@@ -63,7 +63,14 @@ jobs:
           apt-get update && apt-get install -y build-essential xz-utils curl \
             zlib1g-dev libarchive-dev libssl-dev openssl
 
+      - name: Set up perl (default from deb repo)
+        if: matrix.container != 'swipl:stable'
+        run: |
+          apt-get install -y perl cpanminus
 
+      - name: Set up perl (zstd for actions-setup-perl)
+        if: matrix.container == 'swipl:stable'
+        run: |
           # Install newer zstd needed for actions-setup-perl.
           # From <https://github.com/horta/zstd.install>.
           # This needs cmake.
@@ -74,14 +81,17 @@ jobs:
           # is too old for building SWI-Prolog from source.  Will use
           # Alien::cmake3 to get newer version.
           apt-get remove -y cmake
-      - name: Set up perl
+      - name: Set up perl (via actions-setup-perl)
+        if: matrix.container == 'swipl:stable'
         uses: shogo82148/actions-setup-perl@v1
         with:
           perl-version: ${{ matrix.perl }}
           multi-thread: ${{ matrix.thread }}
       - name: Move openssl binary that is part of actions-setup-perl
+        if: matrix.container == 'swipl:stable'
         run: |
           which -a openssl | grep /hostedtoolcache/perl/ | xargs -I{} mv {} {}~
+
       - run: perl -V
       - name: Install Perl deps
         run: |
