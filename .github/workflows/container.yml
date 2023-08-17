@@ -13,7 +13,7 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: 'build-dzil-dist'
         uses: PDLPorters/devops/github-actions/build-dzil-dist@master
   ci-container:
@@ -49,9 +49,9 @@ jobs:
     name: Perl ${{ matrix.perl }},thr-${{ matrix.thread }} with swipl container ${{ matrix.container }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Get dist artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: dist
           path: build-dir
