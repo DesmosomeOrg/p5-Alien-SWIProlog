@@ -125,10 +125,10 @@ share {
 	my $release_type = 'stable';
 	die "Release type must be either 'stable' or 'devel'"
 		unless $release_type =~ /^(stable|devel)$/;
+	# https://www.swi-prolog.org/download/stable/src/
+	# https://www.swi-prolog.org/download/devel/src/
+	start_url "https://www.swi-prolog.org/download/$release_type/src/";
 	plugin Download => (
-		# https://www.swi-prolog.org/download/stable/src/
-		# https://www.swi-prolog.org/download/devel/src/
-		url => "https://www.swi-prolog.org/download/$release_type/src/",
 		version => qr/swipl-([\d\.]+)\.tar\.gz/,
 	);
 
