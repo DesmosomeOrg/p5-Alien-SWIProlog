@@ -1,4 +1,4 @@
-name: Run Tests
+name: Run Tests with Strawberry Perl
 
 on:
   push:
@@ -12,16 +12,21 @@ jobs:
     env:
       AUTHOR_TESTING: 1
     strategy:
+      fail-fast: false
       matrix:
+        perl:
+          - '5'
+          - '5.32'
         os: ['windows-latest']
-    name: Strawberry Perl on ${{ matrix.os }}
+    name: Strawberry Perl ${{ matrix.perl }} on ${{ matrix.os }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Set up perl
         uses: shogo82148/actions-setup-perl@v1
         with:
           distribution: 'strawberry'
+          perl-version: ${{ matrix.perl }}
       - run: perl -V
       - name: Install author deps
         run: |

@@ -13,7 +13,7 @@ jobs:
     if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
     steps:
       - name: Checkout code
-        uses: actions/checkout@v2
+        uses: actions/checkout@v3
       - name: 'build-dzil-dist'
         uses: PDLPorters/devops/github-actions/build-dzil-dist@master
   ci-container:
@@ -31,36 +31,60 @@ jobs:
           - swipl:7.5.15
           - swipl:7.6.4
           - swipl:7.7.25
+
           - swipl:8.0.3
           - swipl:8.1.0
           - swipl:8.1.15
           # The following containers have the conflicting symbol
           # PL_version. See alienfile for more information.
+          # START
           - swipl:8.1.30
           - swipl:8.2.4
           - swipl:8.3.29
           - swipl:8.4.0
+          # END
+
+          # First release with patch for PL_version bug is 8.5.3.
+          - swipl:8.5.3
+          - swipl:8.5.20
+
+          - swipl:9.0.4
+
           - swipl:stable
         include:
           # Include a version that would usually be a system install, but the
           # threading of SWI-Prolog and Perl does not match so must build a share
           # install.
-          - { perl: '5', thread: false, container: 'swipl:7.5.15' }
+          - { perl: '5', thread: false, container: 'swipl:stable' }
     name: Perl ${{ matrix.perl }},thr-${{ matrix.thread }} with swipl container ${{ matrix.container }}
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Get dist artifact
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v3
         with:
           name: dist
           path: build-dir
       - name: Get pre-reqs for steps
         run: |
-          apt-get update && apt-get install -y build-essential xz-utils curl \
-            zlib1g-dev libarchive-dev libssl-dev openssl
+          grep -q stretch /etc/apt/sources.list \
+            && echo "deb http://archive.debian.org/debian stretch main contrib non-free" > /etc/apt/sources.list \
+            && apt-get update \
+            && apt-get install -y --allow-downgrades --no-install-recommends libssl1.1=1.1.0l-1~deb9u1
 
+          apt-get update && apt-get install -y --no-install-recommends \
+            build-essential xz-utils curl \
+            zlib1g-dev libarchive-dev libssl-dev openssl \
+            libgmp-dev
 
+      - name: Set up perl (default from deb repo)
+        if: matrix.container != 'swipl:stable'
+        run: |
+          apt-get install -y perl cpanminus
+
+      - name: Set up perl (zstd for actions-setup-perl)
+        if: matrix.container == 'swipl:stable'
+        run: |
           # Install newer zstd needed for actions-setup-perl.
           # From <https://github.com/horta/zstd.install>.
           # This needs cmake.
@@ -71,14 +95,17 @@ jobs:
           # is too old for building SWI-Prolog from source.  Will use
           # Alien::cmake3 to get newer version.
           apt-get remove -y cmake
-      - name: Set up perl
+      - name: Set up perl (via actions-setup-perl)
+        if: matrix.container == 'swipl:stable'
         uses: shogo82148/actions-setup-perl@v1
         with:
           perl-version: ${{ matrix.perl }}
           multi-thread: ${{ matrix.thread }}
       - name: Move openssl binary that is part of actions-setup-perl
+        if: matrix.container == 'swipl:stable'
         run: |
           which -a openssl | grep /hostedtoolcache/perl/ | xargs -I{} mv {} {}~
+
       - run: perl -V
       - name: Install Perl deps
         run: |
