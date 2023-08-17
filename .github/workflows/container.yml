@@ -31,15 +31,25 @@ jobs:
           - swipl:7.5.15
           - swipl:7.6.4
           - swipl:7.7.25
+
           - swipl:8.0.3
           - swipl:8.1.0
           - swipl:8.1.15
           # The following containers have the conflicting symbol
           # PL_version. See alienfile for more information.
+          # START
           - swipl:8.1.30
           - swipl:8.2.4
           - swipl:8.3.29
           - swipl:8.4.0
+          # END
+
+          # First release with patch for PL_version bug is 8.5.3.
+          - swipl:8.5.3
+          - swipl:8.5.20
+
+          - swipl:9.0.4
+
           - swipl:stable
         include:
           # Include a version that would usually be a system install, but the
