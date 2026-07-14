@@ -1,6 +1,7 @@
 name: Run Tests in swipl containers
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - '*'
@@ -10,7 +11,11 @@ jobs:
   dist:
     name: Make distribution using Dist::Zilla
     runs-on: ubuntu-latest
-    if: ${{ github.event_name == 'push' || github.event_name == 'pull_request' }}
+    if: |
+      ${{    github.event_name == 'push'
+          || github.event_name == 'pull_request'
+          || github.event_name == 'workflow_dispatch'
+       }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v7
