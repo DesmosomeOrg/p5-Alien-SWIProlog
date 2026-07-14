@@ -75,7 +75,9 @@ jobs:
           apt-get update && apt-get install -y --no-install-recommends \
             build-essential xz-utils curl \
             zlib1g-dev libarchive-dev libssl-dev openssl \
-            libgmp-dev
+            libgmp-dev \
+            libncurses-dev \
+            ;
 
       - name: Set up perl (default from deb repo)
         if: matrix.container != 'swipl:stable'
